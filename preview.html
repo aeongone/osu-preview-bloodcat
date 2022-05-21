@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<!--
+          osu-preview edited by aeongdesu
+                 with NeriNyan ❤
+
+         https://github.com/aeongone/osu-preview
+
+      - Respect
+         https://github.com/sunghwan2789/osu-preview
+         https://github.com/jmir1/osu-preview
+      - Thanks to
+         ^ repect developers
+         osu!
+         cloudflare pages
+         vercel
+         nerinyan
+
+      I'm planning to use mino(catboy.best) if nerinyan doesn't have a beatmap
+  -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="robots" content="nofollow, noarchive">
+  <meta property="og:url" content="https://osu.pages.dev/">
+  <meta property="og:title" content="osu!preview - more stable">
+  <meta property="og:description" content="hosted by pages.dev">
+  <title>osu.pages.dev</title>
+  <link rel="icon" sizes="any" href="https://cdn.discordapp.com/emojis/705002474838163467.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="h">
+  <div id="container" class="x-viewbox"></div>
+  <button id="play" class="material-icons">&#xE037</button>
+  <div id="speed">
+    <button value="1.5">DT</button>
+    <button class="e" value="1">-</button>
+    <button value="0.75">HT</button>
+  </div>
+  <div id="mania">
+    <button value="1">+</button>
+    <button id="scroll">20</button>
+    <button value="-1">-</button>
+  </div>
+  <div id="control">
+    <input id="progress" type="range" min="0" max="0" value="0">
+    <input id="volume" type="range" min="0" max="100" value="100">
+    <button id="fullscreen" class="material-icons">&#xE5D0</button>
+  </div>
+  <div id="title">
+    <a id="beatmapdl" target="_blank"><img src="https://cdn.discordapp.com/emojis/705002474838163467.png" width="30"
+        height="30" alt="osuNyan"></a>
+    <a id="beatmapinfo" target="_blank">Loading beatmap info...</a>
+  </div>
+
+  <script src="https://cdn.statically.io/gh/jquery/jquery/3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.statically.io/gh/gildas-lormeau/zip.js/v2.4.10/dist/zip.min.js"></script>
+  <script src="https://cdn.statically.io/gh/brix/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script
+    src="https://cdn.statically.io/gh/Doxee/NoSleep.js/b9e7414386799c6b54aa3769093e4ee7cd7eecb8/dist/NoSleep.min.js"></script>
+
+  <script src="js/util.js"></script>
+  <script src="js/beatmap/beatmap.js"></script>
+  <script src="js/beatmap/timingpoint.js"></script>
+  <script src="js/beatmap/hitobject.js"></script>
+  <script src="js/beatmap/point.js"></script>
+  <script src="js/beatmap/scroll.js"></script>
+
+  <script src="js/standard/standard.js"></script>
+  <script src="js/standard/hitcircle.js"></script>
+  <script src="js/standard/slider.js"></script>
+  <script src="js/standard/curve/curve.js"></script>
+  <script src="js/standard/curve/equaldistancemulticurve.js"></script>
+  <script src="js/standard/curve/linearbezier.js"></script>
+  <script src="js/standard/curve/catmullcurve.js"></script>
+  <script src="js/standard/curve/curvetype.js"></script>
+  <script src="js/standard/curve/bezier2.js"></script>
+  <script src="js/standard/curve/centripetalcatmullrom.js"></script>
+  <script src="js/standard/curve/circumstancedcircle.js"></script>
+  <script src="js/standard/spinner.js"></script>
+
+  <script src="js/taiko/taiko.js"></script>
+  <script src="js/taiko/donkat.js"></script>
+  <script src="js/taiko/drumroll.js"></script>
+  <script src="js/taiko/shaker.js"></script>
+
+  <script src="js/mania/mania.js"></script>
+  <script src="js/mania/hitnote.js"></script>
+  <script src="js/mania/holdnote.js"></script>
+
+  <script src="js/preview.js"></script>
+  <script src="js/viewbox.js"></script>
+
+
+  <script>
+    var preview = new Preview($("#container")[0])
+    var audio = new Audio()
+
+    $(window).on("hashchange", async function () {
+      $(audio).trigger("pause")
+
+      $("#mania").removeClass("e")
+
+      $("#play").removeClass("e")
+                                                        // example
+      var beatmapID = isNaN(location.hash.split("#")[1]) ? 1751496 : location.hash.split("#")[1]
+      var statusText = text => $("#beatmapinfo").text(text)
+
+      statusText("Loading...")
+      const nerinyan = await fetch(`https://api.nerinyan.moe/search?q=${beatmapID}&option=mapid&s=all&nsfw=1`)
+      if (nerinyan.ok) {
+        var osu
+        var bgname
+        var audioname
+        var bgURL
+        var audioURL
+
+        statusText("beatmap found! downloading osz...")
+        const beatmapInfo = (await nerinyan.json())[0]
+        // download osz and decompress (idea from jmir1, thanks!)
+        const blob = await fetch(`https://proxy.nerinyan.moe/d/${beatmapInfo.id}?noVideo=true`).then(res => res.blob())
+        const reader = new zip.ZipReader(new zip.BlobReader(blob))
+        const files = await reader.getEntries()
+        statusText("finding files...")
+        for (file in files) {
+          if (files[file].filename.includes(".osu")) {
+            file = await files[file].getData(new zip.TextWriter())
+            for (bm in beatmapInfo.beatmaps) {
+              if (beatmapID == beatmapInfo.beatmaps[bm].id && CryptoJS.MD5(file).toString() == beatmapInfo.beatmaps[bm].checksum) {
+                console.log(`${file.slice(0, 996)}\n...`)
+                osu = file
+                checkbg = osu.match(/(?<=0,0,").+(?=")/)
+                if (checkbg) bgname = checkbg[0]
+                checkaudio = osu.match(/(?<=AudioFilename: ).+(?=)/)
+                if (checkaudio) audioname = checkaudio[0]
+              }
+            }
+          }
+        }
+        if (bgname) {
+          for (file in files) {
+            if (files[file].filename == bgname.replace(/[\\\/:*?"<>|]/g, "")) {
+              const bgblob = await files[file].getData(
+                new zip.BlobWriter(`image/${bgname.split(".").pop()}`)
+              )
+              bgURL = URL.createObjectURL(bgblob)
+            }
+          }
+        }
+        if (audioname) {
+          for (file in files) {
+            if (files[file].filename == audioname.replace(/[\\\/:*?"<>|]/g, "")) {
+              const bgblob = await files[file].getData(
+                new zip.BlobWriter(`audio/${audioname.split(".").pop()}`)
+              )
+              audioURL = URL.createObjectURL(bgblob)
+            }
+          }
+        }
+        await reader.close()
+        if (osu) {
+          return await preview.load(osu, bgURL, function () {
+            audio.src = audioURL
+            $("#beatmapinfo").prop("href", "https://osu.ppy.sh/b/" + beatmapID)
+              .text(isNaN(location.hash.split("#")[1]) ? "[EXAMPLE MAP] Usage: osu.pages.dev/preview#BEATMAP_ID" : this.beatmap.toString())
+            $("#beatmapdl").prop("href", `https://nerinyan.moe/d/${beatmapInfo.id}`)
+
+            if (this.beatmap instanceof Mania) {
+              $("#mania").addClass("e")
+              $("#scroll").text(this.beatmap.scrollSpeed)
+            }
+
+            $("#play").addClass("e")
+          },
+            function (e) {
+              alert(e)
+              console.log(e)
+            })
+
+        } else {
+          alert("Can't find the beatmap file!\nPlease contact me to fix this issue faster!\nDiscord: https://discord.deta.dev")
+          return statusText("Can't find the beatmap file!")
+        }
+
+      } else return statusText("beatmap not found")
+
+    }).trigger("hashchange")
+
+    $(document.body).on("mousemove", function () {
+      var self = $(this)
+      clearTimeout(self.data("h"))
+      self.addClass("h").data("h", setTimeout(function () {
+        if (!audio.paused) {
+          self.removeClass("h")
+        }
+      }, 3000))
+    })
+
+    const noSleep = new NoSleep()
+
+    $(audio).on("pause", function (e) {
+      $(document.body).trigger("mousemove")
+      $("#play").addClass("e")
+      noSleep.disable()
+    }).on("play", function (e) {
+      preview.beatmap.refresh()
+      if (e.isTrigger) {
+        e.preventDefault()
+        preview.at(audio.currentTime * 1000)
+      }
+      else {
+        $("#play").removeClass("e")
+        requestAnimationFrame(function foo() {
+          preview.at(audio.currentTime * 1000)
+          if (!audio.paused) {
+            requestAnimationFrame(foo)
+          }
+        })
+        noSleep.enable()
+      }
+    }).on("durationchange", function () {
+      $("#progress").val(0).prop("max", this.duration)
+      $("#volume").trigger("change")
+      $("#speed .e").trigger("click")
+    }).on("timeupdate", function () {
+      $("#progress").val(this.currentTime)
+    })
+
+    $("#progress").on("change", function () {
+      audio.currentTime = this.value
+      $(audio).trigger("play")
+    })
+
+    $("#volume").on("change", function () {
+      audio.volume = this.value / 100
+    })
+
+    $("#speed button").on("click", function () {
+      $("#speed .e").removeClass("e")
+      audio.playbackRate = $(this).addClass("e").val()
+    })
+
+    $("#mania button").on("click", function () {
+      var val = this.value | 0
+      if (val) {
+        preview.beatmap.scrollSpeed += val
+        $("#scroll").text(preview.beatmap.scrollSpeed)
+        $(audio).trigger("play")
+      }
+    })
+
+    $("#play").on("click", function (e) {
+      e.preventDefault()
+      if ($(this).hasClass("e")) {
+        audio.play()
+      }
+      else {
+        audio.pause()
+      }
+    })
+
+    $("#fullscreen").on("click", function (e) {
+      e.preventDefault()
+      var doc = window.document
+      var docEl = doc.documentElement
+
+      var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen
+      var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen
+
+      if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+        requestFullScreen.call(docEl)
+      }
+      else {
+        cancelFullScreen.call(doc)
+      }
+    })
+
+  </script>
+</body>
+
+</html>
