@@ -57,11 +57,10 @@
     <a id="beatmapinfo" target="_blank">Loading beatmap info...</a>
   </div>
 
-  <script src="https://cdn.statically.io/gh/jquery/jquery/3.6.0/dist/jquery.slim.min.js"></script>
-  <script src="https://cdn.statically.io/gh/gildas-lormeau/zip.js/v2.4.10/dist/zip.min.js"></script>
+  <script src="https://cdn.statically.io/gh/jquery/jquery/3.6.1/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.statically.io/gh/gildas-lormeau/zip.js/v2.6.29/dist/zip.min.js"></script>
   <script src="https://cdn.statically.io/gh/brix/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script
-    src="https://cdn.statically.io/gh/Doxee/NoSleep.js/b9e7414386799c6b54aa3769093e4ee7cd7eecb8/dist/NoSleep.min.js"></script>
+  <script src="https://cdn.statically.io/gh/Doxee/NoSleep.js/b9e7414386799c6b54aa3769093e4ee7cd7eecb8/dist/NoSleep.min.js"></script>
 
   <script src="js/util.js"></script>
   <script src="js/beatmap/beatmap.js"></script>
@@ -131,8 +130,8 @@
             file = await files[file].getData(new zip.TextWriter())
             for (bm in beatmapInfo.beatmaps) {
               if (beatmapID == beatmapInfo.beatmaps[bm].id && CryptoJS.MD5(file).toString() == beatmapInfo.beatmaps[bm].checksum) {
-                console.log(`${file.slice(0, 996)}\n...`)
-                osu = file
+                osu = unescape(encodeURIComponent(file))
+                console.log(`${osu.slice(0, 996)}\n...`)
                 checkbg = osu.match(/(?<=0,0,").+(?=")/)
                 if (checkbg) bgname = checkbg[0]
                 checkaudio = osu.match(/(?<=AudioFilename: ).+(?=)/)
