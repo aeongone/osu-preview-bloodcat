@@ -129,8 +129,10 @@
           if (files[file].filename.includes(".osu")) {
             file = await files[file].getData(new zip.TextWriter())
             for (bm in beatmapInfo.beatmaps) {
+              console.log(CryptoJS.MD5(file).toString())
+              console.log(beatmapInfo.beatmaps[bm].checksum + "\n-------\n")
               if (beatmapID == beatmapInfo.beatmaps[bm].id && CryptoJS.MD5(file).toString() == beatmapInfo.beatmaps[bm].checksum) {
-                osu = unescape(encodeURIComponent(file))
+                osu = file
                 console.log(`${osu.slice(0, 996)}\n...`)
                 checkbg = osu.match(/(?<=0,0,").+(?=")/)
                 if (checkbg) bgname = checkbg[0]
