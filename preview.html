@@ -124,13 +124,12 @@
         const blob = await fetch(`https://proxy.nerinyan.moe/d/${beatmapInfo.id}?nv=1&nh=1&nsb=1`).then(res => res.blob())
         const reader = new zip.ZipReader(new zip.BlobReader(blob))
         const files = await reader.getEntries()
+        const decode = new TextDecoder("utf-8")
         statusText("finding files...")
         for (file in files) {
           if (files[file].filename.includes(".osu")) {
-            file = await files[file].getData(new zip.TextWriter())
+            file = decode.decode(await files[file].getData(new zip.TextWriter()))
             for (bm in beatmapInfo.beatmaps) {
-              console.log(CryptoJS.MD5(file).toString())
-              console.log(beatmapInfo.beatmaps[bm].checksum + "\n-------\n")
               if (beatmapID == beatmapInfo.beatmaps[bm].id && CryptoJS.MD5(file).toString() == beatmapInfo.beatmaps[bm].checksum) {
                 osu = file
                 console.log(`${osu.slice(0, 996)}\n...`)
