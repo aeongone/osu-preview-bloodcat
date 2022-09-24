@@ -59,7 +59,6 @@
 
   <script src="https://cdn.statically.io/gh/jquery/jquery/3.6.1/dist/jquery.slim.min.js"></script>
   <script src="https://cdn.statically.io/gh/gildas-lormeau/zip.js/v2.6.29/dist/zip.min.js"></script>
-  <script src="https://cdn.statically.io/gh/brix/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="https://cdn.statically.io/gh/Doxee/NoSleep.js/b9e7414386799c6b54aa3769093e4ee7cd7eecb8/dist/NoSleep.min.js"></script>
 
   <script src="js/util.js"></script>
@@ -128,15 +127,13 @@
         for (file in files) {
           if (files[file].filename.includes(".osu")) {
             file = await files[file].getData(new zip.TextWriter("utf-8"))
-            for (bm in beatmapInfo.beatmaps) {
-              if (beatmapID == beatmapInfo.beatmaps[bm].id && (file.match(/(?<=BeatmapID:).+(?=)/))[0]) {
-                osu = file
-                console.log(`${osu.slice(0, 996)}\n...`)
-                checkbg = osu.match(/(?<=0,0,").+(?=")/)
-                if (checkbg) bgname = checkbg[0]
-                checkaudio = osu.match(/(?<=AudioFilename: ).+(?=)/)
-                if (checkaudio) audioname = checkaudio[0]
-              }
+            if (beatmapID == (file.match(/(?<=BeatmapID:).+(?=)/))[0]) {
+              osu = file
+              console.log(`${osu.slice(0, 996)}\n...`)
+              checkbg = osu.match(/(?<=0,0,").+(?=")/)
+              if (checkbg) bgname = checkbg[0]
+              checkaudio = osu.match(/(?<=AudioFilename: ).+(?=)/)
+              if (checkaudio) audioname = checkaudio[0]
             }
           }
         }
