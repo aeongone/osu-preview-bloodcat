@@ -127,11 +127,9 @@
         statusText("finding files...")
         for (file in files) {
           if (files[file].filename.includes(".osu")) {
-            const array = await files[file].getData(new zip.Uint8ArrayWriter())
-            console.log(array)
-            console.log(CryptoJS.lib.WordArray.create(array).toString(CryptoJS.enc.MD5))
             for (bm in beatmapInfo.beatmaps) {
-              if (CryptoJS.lib.WordArray.create(array).toString(CryptoJS.enc.MD5) == beatmapInfo.beatmaps[bm].checksum) {
+              const beatmap = beatmapInfo.beatmaps[bm]
+              if (files[file].filename == `${beatmapInfo.artist} - ${beatmapInfo.title} (${beatmapInfo.creator}) [${beatmap.version}].osu`) {
                 osu = await files[file].getData(new zip.TextWriter("utf-8"))
                 console.log(`${osu.slice(0, 996)}\n...`)
                 checkbg = osu.match(/(?<=0,0,").+(?=")/)
