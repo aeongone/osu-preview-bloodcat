@@ -127,10 +127,10 @@
         statusText("finding files...")
         for (file in files) {
           if (files[file].filename.includes(".osu")) {
-            file = await files[file].getData(new zip.TextWriter("utf-8"))
+            array = await files[file].getData(new zip.Uint8ArrayWriter())
             for (bm in beatmapInfo.beatmaps) {
-              if (CryptoJS.MD5(await files[file].getData(new zip.Uint8ArrayWriter())).toString() == beatmapInfo.beatmaps[bm].checksum) {
-                osu = file
+              if (CryptoJS.MD5(array).toString() == beatmapInfo.beatmaps[bm].checksum) {
+                osu = await files[file].getData(new zip.TextWriter("utf-8"))
                 console.log(`${osu.slice(0, 996)}\n...`)
                 checkbg = osu.match(/(?<=0,0,").+(?=")/)
                 if (checkbg) bgname = checkbg[0]
