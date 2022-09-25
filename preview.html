@@ -129,7 +129,7 @@
           if (files[file].filename.includes(".osu")) {
             for (bm in beatmapInfo.beatmaps) {
               const beatmap = beatmapInfo.beatmaps[bm]
-              if (new TextDecoder("utf-8").decode(files[file].rawFilename) == `${beatmapInfo.artist} - ${beatmapInfo.title} (${beatmapInfo.creator}) [${beatmap.version}].osu`) {
+              if (beatmap.id == beatmapID && new TextDecoder("utf-8").decode(files[file].rawFilename) == `${beatmapInfo.artist} - ${beatmapInfo.title} (${beatmapInfo.creator}) [${beatmap.version}].osu`) {
                 osu = await files[file].getData(new zip.TextWriter("utf-8"))
                 console.log(`${osu.slice(0, 996)}\n...`)
                 checkbg = osu.match(/(?<=0,0,").+(?=")/)
