@@ -121,7 +121,7 @@
         statusText("beatmap found! downloading osz...")
         const beatmapInfo = (await nerinyan.json())[0]
         // download osz and decompress (idea from jmir1, thanks!)
-        const blob = await fetch(`https://proxy.nerinyan.moe/d/${beatmapInfo.id}?nv=1&nh=1&nsb=1`).then(res => res.blob())
+        const blob = await fetch(`https://api.nerinyan.moe/d/${beatmapInfo.id}?nv=1&nh=1&nsb=1`).then(res => res.blob())
         const reader = new zip.ZipReader(new zip.BlobReader(blob))
         const files = await reader.getEntries()
         statusText("finding files...")
