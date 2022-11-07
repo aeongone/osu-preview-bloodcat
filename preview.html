@@ -121,7 +121,7 @@
         statusText("beatmap found! downloading osz...")
         const beatmapInfo = (await nerinyan.json())[0]
         // download osz and decompress (idea from jmir1, thanks!)
-        const blob = await fetch(`https://api.nerinyan.moe/d/${beatmapInfo.id}?nv=1&nh=1&nsb=1`).then(res => res.blob())
+        const blob = await fetch(`https://proxy.nerinyan.moe/d/${beatmapInfo.id}?nv=1&nh=1&nsb=1`).then(res => res.blob())
         const reader = new zip.ZipReader(new zip.BlobReader(blob))
         const files = await reader.getEntries()
         statusText("finding files...")
@@ -166,7 +166,7 @@
             audio.src = audioURL
             $("#beatmapinfo").prop("href", "https://osu.ppy.sh/b/" + beatmapID)
               .text(isNaN(location.hash.split("#")[1]) ? "[EXAMPLE MAP] Usage: osu.pages.dev/preview#BEATMAP_ID" : this.beatmap.toString())
-            $("#beatmapdl").prop("href", `https://nerinyan.moe/d/${beatmapInfo.id}`)
+            $("#beatmapdl").prop("href", `https://api.nerinyan.moe/d/${beatmapInfo.id}`)
 
             if (this.beatmap instanceof Mania) {
               $("#mania").addClass("e")
