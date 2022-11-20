@@ -129,13 +129,14 @@
           if (files[file].filename.includes(".osu")) {
             for (bm in beatmapInfo.beatmaps) {
               const beatmap = beatmapInfo.beatmaps[bm]
-              if (beatmap.id == beatmapID && files[file].filename.replace(/[^a-zA-Z]/g, "") == beatmap.osu_file.replace(/[^a-zA-Z]/g, "")) {
+              if (beatmap.id == beatmapID && files[file].filename.toUpperCase() == beatmap.osu_file.toUpperCase()) {
                 osu = await files[file].getData(new zip.TextWriter("utf-8"))
                 console.log(`${osu.slice(0, 996)}\n...`)
                 checkbg = osu.match(/(?<=0,0,").+(?=")/)
                 if (checkbg) bgname = checkbg[0]
                 checkaudio = osu.match(/(?<=AudioFilename: ).+(?=)/)
                 if (checkaudio) audioname = checkaudio[0]
+                break
               }
             }
           }
@@ -147,6 +148,7 @@
                 new zip.BlobWriter(`image/${bgname.split(".").pop()}`)
               )
               bgURL = URL.createObjectURL(bgblob)
+              break
             }
           }
         }
@@ -157,6 +159,7 @@
                 new zip.BlobWriter(`audio/${audioname.split(".").pop()}`)
               )
               audioURL = URL.createObjectURL(bgblob)
+              break
             }
           }
         }
