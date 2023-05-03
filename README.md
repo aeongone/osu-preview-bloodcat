@@ -1,3 +1,8 @@
+# Archived
+please use https://github.com/aeongone/osu-preview
+
+---
+
 # osu-preview-nerinyan
 Please use nerinyan because its good mirror server
 
